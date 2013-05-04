@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*- 
 
 import xlrd
+import re
+import sys 
+reload(sys) 
+sys.setdefaultencoding('utf8') 
 
 def parse(source_path,destination_path,date):
 	f = open(destination_path+date+"_raw.csv","w+")
@@ -20,82 +24,53 @@ def parse(source_path,destination_path,date):
 
 	bank_data = {}
 	total_data = range(len(header)-3)
-	read_flag = 0 #不作用
 	jump_gap = 8
-	mode1_line = -1
-	mode2_line = -1
-
+	mode  = 0
 	for i in range(sh.nrows):
 		row_name = unicode(sh.cell_value(rowx=i,colx = 0))
-		#print row_name
+
 		#print u"2-5　一般銀行外匯存款餘額									"
 		#if row_name == u"2-5　一般銀行外匯存款餘額":
 		#	print "yes"
 		if unicode(sh.cell_value(rowx=i,colx = 1)) == u"":	
 			#空的但是資料開頭就跳到資料頭		
 			if  row_name == u"2-5　一般銀行外匯存款餘額":
-				read_flag = 1 # 全行
-				mode1_line = i+jump_gap
-				print "HI %d" %mode1_line
+				mode =1
 			
-			if row_name == u"2-5　一般銀行外匯存款餘額（續一）":
-				read_flag = 1 # 全行
-				mode1_line = i+jump_gap
+			#if row_name == u"2-5　一般銀行外匯存款餘額（續一）":
+	#			mode1_line = i+jump_gap
 			
-			if row_name== u"2-5　一般銀行外匯存款餘額（續二）":
-				read_flag = 1 # 全行
-				mode1_line = i+jump_gap
+	#		if row_name== u"2-5　一般銀行外匯存款餘額（續二）":
+	#			mode1_line = i+jump_gap
 			
 			if row_name == u"2-5　一般銀行外匯存款餘額（續三）":
-				read_flag = 2 # 國內
-				mode2_line = i+jump_gap
-			
-			if row_name == u"2-5　一般銀行外匯存款餘額（續四）":
-				read_flag = 2 # 國內
-				mode2_line = i+jump_gap
-			
-			if row_name == u"2-5　一般銀行外匯存款餘額（續五完）":
-				read_flag = 2 # 國內
-				mode2_line = i+jump_gap
-		else:
-			#不是空的就讀下一行
-			if i>read1_line
-			mode1_line =  mode1_line+1
-			mode2_line =  mode2_line+1
-		print "===mode1_line %d"%mode1_line
-		print "mode2_line %d"%mode2_line	
-		print "%d  || %s" % (i,unicode(sh.cell_value(rowx=i,colx = 1)))
-		#print bank_data
-		#print row_name
+				mode =2
 
-
+			print "%d: Empty:%s" %(i,row_name)
+			continue
+		
+		#第二藍衛如果是文字就跳過
+		if len(re.findall(r"[-+]?\d*\.\d+|\d+",unicode(sh.cell_value(rowx=i,colx = 1)))) == 0:
+			continue
 
 		#全行總和
-		if row_name== u"總　　　　　計　Total" and i == mode1_line:
+		if row_name== u"總　　　　　計　Total" and 1 == mode:
 			total_data[0] = date
 			total_data[1] = float(sh.cell_value(rowx=i,colx = 1))*1e6
 			total_data[2] = float(sh.cell_value(rowx=i,colx = 2))*1e6
 			total_data[3] = float(sh.cell_value(rowx=i,colx = 3))*1e6
+			continue
 		#全行銀行
-		if i == mode1_line:
+		if 1 == mode:
 			bank_name = unicode(sh.cell_value(rowx=i,colx = 0))
 			bank_data[bank_name] = {}
-			
-			
-			try:
-				bank_data[bank_name]["ALL_MY"] = float(sh.cell_value(rowx=i,colx = 1))*1e6
-				bank_data[bank_name]["ALL_FY"] = float(sh.cell_value(rowx=i,colx = 2))*1e6
-				bank_data[bank_name]["ALL_Y"] = float(sh.cell_value(rowx=i,colx = 3))*1e6
-				print "%s %% %s" %(bank_data[bank_name],bank_name)
-			except ValueError:
-				print "NO"
-				bank_data[bank_name]["ALL_MY"] = -1
-				bank_data[bank_name]["ALL_FY"] = -1
-				bank_data[bank_name]["ALL_Y"] = -1
-			print unicode(sh.cell_value(rowx=i,colx = 0))
-			print "%s %% %s" %(bank_data[bank_name],bank_name)
+			bank_data[bank_name]["ALL_MY"] = float(sh.cell_value(rowx=i,colx = 1))*1e6
+			bank_data[bank_name]["ALL_FY"] = float(sh.cell_value(rowx=i,colx = 2))*1e6
+			bank_data[bank_name]["ALL_Y"] = float(sh.cell_value(rowx=i,colx = 3))*1e6
+
+
 		#全行總和
-		if sh.cell_value(rowx=i,colx = 0)== u"總　　　　　計　Total" and i == mode2_line:
+		if sh.cell_value(rowx=i,colx = 0)== u"總　　　　　計　Total" and 2 == mode:
 			#國內
 			total_data[4] = float(sh.cell_value(rowx=i,colx = 1))*1e6
 			total_data[5] = float(sh.cell_value(rowx=i,colx = 2))*1e6
@@ -104,35 +79,52 @@ def parse(source_path,destination_path,date):
 			total_data[7] = total_data[1] - total_data[4]
 			total_data[8] = total_data[2] - total_data[5]
 			total_data[9] = total_data[3] - total_data[6]
+			continue
 		#全行銀行
-		if i == mode2_line:
+		if 2 == mode:
 			bank_name = unicode(sh.cell_value(rowx=i,colx = 0))
-			try:	
-				bank_data[bank_name]["DB_MY"] = float(sh.cell_value(rowx=i,colx = 1))*1e6
-				bank_data[bank_name]["DB_FY"] = float(sh.cell_value(rowx=i,colx = 2))*1e6
-				bank_data[bank_name]["DB_Y"] = float(sh.cell_value(rowx=i,colx = 3))*1e6
-				bank_data[bank_name]["OS_MY"] = bank_data[bank_name]["ALL_MY"] - bank_data[bank_name]["OS_MY"]
-				bank_data[bank_name]["OS_FY"] = bank_data[bank_name]["ALL_FY"] - bank_data[bank_name]["OS_FY"]
-				bank_data[bank_name]["OS_Y"] = bank_data[bank_name]["ALL_Y"] - bank_data[bank_name]["OS_Y"]
-				print "%s %% %s" %(bank_data[bank_name],bank_name)
-			except ValueError:
-				print "NO"
-				bank_data[bank_name]["DB_MY"] = -1
-				bank_data[bank_name]["DB_FY"] = -1
-				bank_data[bank_name]["DB_Y"] = -1
-				bank_data[bank_name]["OS_MY"] = -1
-				bank_data[bank_name]["OS_FY"] = -1
-				bank_data[bank_name]["OS_Y"] = -1
-			print bank_name
-			print unicode(sh.cell_value(rowx=i,colx = 0))
-			print "%s %% %s" % (bank_data[bank_name],bank_name)
-	print "bank_data ===="
-	print bank_data
-	print "total_data ===="
-	print total_data
+			bank_data[bank_name]["DB_MY"] = float(sh.cell_value(rowx=i,colx = 1))*1e6
+			bank_data[bank_name]["DB_FY"] = float(sh.cell_value(rowx=i,colx = 2))*1e6
+			bank_data[bank_name]["DB_Y"] = float(sh.cell_value(rowx=i,colx = 3))*1e6
+			bank_data[bank_name]["OS_MY"] = bank_data[bank_name]["ALL_MY"] - bank_data[bank_name]["DB_MY"]
+			bank_data[bank_name]["OS_FY"] = bank_data[bank_name]["ALL_FY"] - bank_data[bank_name]["DB_FY"]
+			bank_data[bank_name]["OS_Y"] = bank_data[bank_name]["ALL_Y"] - bank_data[bank_name]["DB_Y"]
+				#print "%s %% %s" %(bank_data[bank_name],bank_name)
 
+				
 
+#輸出
+	f = open("%sTotal_%s.csv"%(destination_path,date),"w+")
+	
+	total_header = ['年月','全行外匯活期存款','全行外匯定期存款','全行總額','國內外匯活期存款','國內外匯定期存款','國內總額','海外外匯活期存款','海外外匯定期存款','海外總額']
+	f.write(",".join(total_header)+"\n")
+	f.write(",".join(map(str,map(int,total_data))))
+	f.close()
 
+	f = open("%s%s.csv"%(destination_path,date),"w+")
+	header = ['年月','銀行','銀行英文','全行外匯活期存款','全行外匯定期存款','全行總額','國內外匯活期存款','國內外匯定期存款','國內總額','海外外匯活期存款','海外外匯定期存款','海外總額','金控註記']
+	f.write(",".join(header)+"\n")
+	for i in bank_data:
+		try:
+			d = [None]*13
+			d[0] = date
+			d[1] = i
+			d[2] = ""
+			d[3] = int(bank_data[i]["ALL_MY"])
+			d[4] = int(bank_data[i]["ALL_FY"])
+			d[5] = int(bank_data[i]["ALL_Y"])
+			d[6] = int(bank_data[i]["DB_MY"])
+			d[7] = int(bank_data[i]["DB_FY"])
+			d[8] = int(bank_data[i]["DB_Y"])
+			d[9] = int(bank_data[i]["OS_MY"])
+			d[10] = int(bank_data[i]["OS_FY"])
+			d[11] = int(bank_data[i]["OS_Y"])
+			d[12] = 0
+			f.write(",".join(map(str,d))+"\n")
+		except KeyError:
+			f.write(",".join(map(str,d))+"\n")
+
+	f.close()
 
 
  		
