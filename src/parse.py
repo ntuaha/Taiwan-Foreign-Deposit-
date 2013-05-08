@@ -89,14 +89,16 @@ def parse(source_path,destination_path,date):
 	output(destination_path,date,total_data,bank_data,header)
 				
 
+
+
+
+
+
 #輸出
 def output(destination_path,date,total_data,bank_data,header):
 	f = open("%sTotal.csv"%(destination_path),"a+")
-	
-
 	f.write(",".join(map(str,map(int,total_data)))+"\n")
 	f.close()
-
 	f = open("%s%s.csv"%(destination_path,date),"w+")
 	#header = ['年月','銀行','銀行英文','全行外匯活期存款','全行外匯定期存款','全行總額','國內外匯活期存款','國內外匯定期存款','國內總額','海外外匯活期存款','海外外匯定期存款','海外總額','金控註記']
 	f.write(",".join(header)+"\n")
