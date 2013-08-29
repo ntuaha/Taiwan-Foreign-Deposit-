@@ -17,21 +17,26 @@ if __name__ == '__main__':
 	total_header = ['年月','全行外匯活期存款','全行外匯定期存款','全行總額','國內外匯活期存款','國內外匯定期存款','國內總額','海外外匯活期存款','海外外匯定期存款','海外總額']
 	f.write(",".join(total_header)+"\n")
 	f.close()
-	yy = 100
-	mm = 2
+
+#Use parse.py to extract data from xls to csv before 2011.2
 	for yy in range(95,100):
 		for mm in range(1,13):
 			date = '%d%02d'%(yy,mm)
 			parse.parse(from_path,to_path,date)
 	parse.parse(from_path,to_path,'10001')
+
+#Use parse2.py to extract data from xls to csv 2011.2 - now
 	for mm in range(2,13):
 		date = '%d%02d'%(100,mm)
 		parse2.parse(from_path,to_path,date)
 	for mm in range(1,13):
 		date = '%d%02d'%(101,mm)
 		parse2.parse(from_path,to_path,date)
-	parse2.parse(from_path,to_path,'10201')
-	parse2.parse(from_path,to_path,'10202')
+	for mm in range(1,13):
+		date = '%d%02d'%(102,mm)
+		parse2.parse(from_path,to_path,date)		
+	#parse2.parse(from_path,to_path,'10201')
+	#parse2.parse(from_path,to_path,'10202')
 
 
 

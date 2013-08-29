@@ -11,10 +11,10 @@ sys.setdefaultencoding('utf8')
 
 def parse(source_path,destination_path,date):
 	book = xlrd.open_workbook(source_path+date+".xls")
-	print "The number of worksheets is",book.nsheets
-	print "Worksheet name(s):", book.sheet_names()
+	#print "The number of worksheets is",book.nsheets
+	#print "Worksheet name(s):", book.sheet_names()
 	sh = book.sheet_by_index(0)
-	print sh.name, sh.nrows, sh.ncols
+	#print sh.name, sh.nrows, sh.ncols
 
 	bank_data = {}
 	header = ['年月','銀行','銀行英文','全行外匯活期存款','全行外匯定期存款','全行總額','國內外匯活期存款','國內外匯定期存款','國內總額','海外外匯活期存款','海外外匯定期存款','海外總額','金控註記']

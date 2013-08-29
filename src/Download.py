@@ -6,7 +6,6 @@ import numpy as np
 import webbrowser
 import os
 
-#只能抓取得到95年之後的資料
 def download(year,month):
 	password = "aruxopq0rliabmUVxillmnWcop79abcdLXpemqeZijklqefgelfqeiIJKprlineYdeaBNyneytthjjlobc93A456hijki"
 	random_number = np.random.random_integers(0,len(password)-1,8)

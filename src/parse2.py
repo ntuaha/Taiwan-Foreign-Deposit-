@@ -19,7 +19,7 @@ def parse(source_path,destination_path,date):
 	total_data = range(len(header)-3)
 	for sheet_num in range(book.nsheets):
 		sh = book.sheet_by_index(sheet_num)
-		print sh.name, sh.nrows, sh.ncols
+		#print sh.name, sh.nrows, sh.ncols
 
 		
 		mode  = modes[sheet_num]
@@ -30,7 +30,7 @@ def parse(source_path,destination_path,date):
 			#print u"2-5　一般銀行外匯存款餘額									"
 			#if row_name == u"2-5　一般銀行外匯存款餘額":
 			#	print "yes"
-			print "%d - %s, %s" % (i,row_name,unicode(sh.cell_value(rowx=i,colx = 1)))
+			#print "%d - %s, %s" % (i,row_name,unicode(sh.cell_value(rowx=i,colx = 1)))
 			if unicode(sh.cell_value(rowx=i,colx = 1)) == u"":	
 				#空的但是資料開頭就跳到資料頭		
 		#		if  row_name == u"2-5　一般銀行外匯存款餘額":
@@ -151,8 +151,8 @@ if __name__ == '__main__':
 	total_header = ['年月','全行外匯活期存款','全行外匯定期存款','全行總額','國內外匯活期存款','國內外匯定期存款','國內總額','海外外匯活期存款','海外外匯定期存款','海外總額']
 	f.write(",".join(total_header)+"\n")
 	f.close()
-	yy = 100
-	mm = 2
+	yy = 101
+	mm = 3
 	#for yy in range(95,100):
 #		for mm in range(1,13):
 	date = '%d%02d'%(yy,mm)
